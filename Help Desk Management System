@@ -1,0 +1,182 @@
+import java.util.ArrayList;
+import java.util.List;
+
+// Enum for user roles
+enum Role {
+    USER,
+    SUPPORT_STAFF,
+    ADMIN
+}
+class HelpDeskSystem {
+    private List<User> users;
+    private List<Ticket> tickets;
+    private int nextTicketId;
+
+    public HelpDeskSystem() {
+        users = new ArrayList<>();
+        tickets = new ArrayList<>();
+        nextTicketId = 1; // Start ticket IDs from 1
+    }
+
+    // Method to register a new user
+    public void registerUser(String username, String password, Role role) {
+        User newUser = new User(username, password, role);
+        users.add(newUser);
+        System.out.println("User " + username + " registered successfully.");
+    }
+
+    // Method to authenticate a user
+    public User authenticateUser(String username, String password) {
+        for (User user : users) {
+            if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
+                return user;
+            }
+        }
+        return null; // Return null if authentication fails
+    }
+
+    // Method to submit a new ticket
+    public void submitTicket(String description, User creator) {
+        Ticket newTicket = new Ticket(nextTicketId++, description, creator);
+        tickets.add(newTicket);
+        System.out.println("Ticket submitted successfully. Ticket ID: " + newTicket.getTicketId());
+    }
+
+    // Method to assign a ticket to a support staff
+    public void assignTicket(int ticketId, User supportStaff) {
+        for (Ticket ticket : tickets) {
+            if (ticket.getTicketId() == ticketId) {
+                ticket.setAssignedStaff(supportStaff);
+                ticket.setStatus("IN_PROGRESS");
+                System.out.println("Ticket " + ticketId + " assigned to " + supportStaff.getUsername());
+                return;
+            }
+        }
+        System.out.println("Ticket ID " + ticketId + " not found.");
+    }
+
+    // Method to update ticket status
+    public void updateTicketStatus(int ticketId, String newStatus) {
+        for (Ticket ticket : tickets) {
+            if (ticket.getTicketId() == ticketId) {
+                ticket.setStatus(newStatus);
+                System.out.println("Ticket " + ticketId + " status updated to " + newStatus);
+                return;
+            }
+        }
+        System.out.println("Ticket ID " + ticketId + " not found.");
+    }
+
+    // Method to display all tickets
+    public void displayTickets() {
+        System.out.println("All Tickets:");
+        for (Ticket ticket : tickets) {
+            System.out.println(ticket.getTicketId() + " - " + ticket.getDescription() + " - Status: " + ticket.getStatus());
+        }
+    }
+
+    // Main method for testing
+    public static void main(String[] args) {
+        HelpDeskSystem helpDesk = new HelpDeskSystem();
+
+        // Register users
+        helpDesk.registerUser("alice", "password", Role.USER);
+        helpDesk.registerUser("bob", "password", Role.SUPPORT_STAFF);
+
+        // Authenticate users
+        User authenticatedUser = helpDesk.authenticateUser("alice", "password");
+        if (authenticatedUser != null) {
+            System.out.println("User " + authenticatedUser.getUsername() + " authenticated successfully.");
+        } else {
+            System.out.println("Authentication failed.");
+        }
+
+        // Submit a ticket
+        helpDesk.submitTicket("Internet connection issue", authenticatedUser);
+        helpDesk.submitTicket("Software installation problem", authenticatedUser);
+
+        // Display all tickets
+        helpDesk.displayTickets();
+
+        // Assign a ticket
+        helpDesk.assignTicket(1, helpDesk.authenticateUser("bob", "password"));
+
+        // Update ticket status
+        helpDesk.updateTicketStatus(1, "RESOLVED");
+
+        // Display all tickets after update
+        helpDesk.displayTickets();
+    }
+}
+
+// Class representing a User
+class User {
+    private String username;
+    private String password;
+    private Role role;
+
+    public User(String username, String password, Role role) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+}
+
+// Class representing a Ticket
+class Ticket {
+    private int ticketId;
+    private String description;
+    private String status;
+    private User creator;
+    private User assignedStaff;
+
+    public Ticket(int ticketId, String description, User creator) {
+        this.ticketId = ticketId;
+        this.description = description;
+        this.status = "OPEN"; // Initial status
+        this.creator = creator;
+        this.assignedStaff = null; // No assigned staff initially
+    }
+
+    public int getTicketId() {
+        return ticketId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public User getCreator() {
+        return creator;
+    }
+
+    public User getAssignedStaff() {
+        return assignedStaff;
+    }
+
+    public void setAssignedStaff(User assignedStaff) {
+        this.assignedStaff = assignedStaff;
+    }
+}
+
+// Main Help Desk Management System class
